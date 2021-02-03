@@ -1,0 +1,1 @@
+This project is appointed for a short demonstration of a simple initial voice assistant. It contains REST API code which is called from the Google Dialogflow platform via webhooks (https://cloud.google.com/dialogflow/es/docs/fulfillment-webhook )
