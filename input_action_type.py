@@ -1,8 +1,6 @@
 import aenum
 from enum import Enum
 
-from question_answer_session.qa_type import QAType
-
 
 class IntentType(aenum.Enum):
     LOAN = 0, "loan"
@@ -22,6 +20,7 @@ class InputActionType(Enum):
     SSN_CALLING = 4,
     EMAIL_CALLING = 5,
     END = 6,
+    ANY = 7,
     UNKNOWN = -1
 
     def is_intent(self):
@@ -42,7 +41,6 @@ class InputActionType(Enum):
         if self is InputActionType.EMAIL_CALLING:
             return True
 
-
         return False
 
     def is_fallback(self):
@@ -51,27 +49,9 @@ class InputActionType(Enum):
 
         return False
 
-    def convert_to_intent_type(self) -> IntentType:
-        if self is InputActionType.OPEN_LOAN:
-            return IntentType.LOAN
-
-        return IntentType.UNDEFINED
-
-    def convert_to_qa_type(self) -> QAType:
-        if self is InputActionType.NAME_CALLING:
-            return QAType.NAME
-
-        if self is InputActionType.DOB_CALLING:
-            return QAType.DOB
-
-        if self is InputActionType.SSN_CALLING:
-            return QAType.SSN
-
-        if self is InputActionType.EMAIL_CALLING:
-            return QAType.EMAIL
-
-        return QAType.UNDEFINED
-
+    # def __str__(self):
+    #     #TODO: add description
+    #     return str(self)
 
 QA_SESSION_TYPES = [InputActionType.NAME_CALLING, InputActionType.DOB_CALLING]
 
@@ -85,4 +65,3 @@ INPUT_ACTION_NAME_TYPE_MAPPER = {
     'input.fallback': InputActionType.UNKNOWN,
     "input.end": InputActionType.END
 }
-
