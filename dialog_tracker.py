@@ -54,11 +54,7 @@ class DialogTracker:
             self.personal_info.main_user_intent = user_input_action.convert_to_intent_type()
 
     def save_personal_information(self):
-        #TODO: replace iterate list
         print("#########-Personal information#########################")
-        print("First name: ", self.personal_info.get_param_value(ParameterKeys.FIRST_NAME))
-        print("Last name: ", self.personal_info.get_param_value(ParameterKeys.LAST_NAME))
-        print("Date of birthday: ", self.personal_info.get_param_value(ParameterKeys.DOB))
-        print("Social security number: ", self.personal_info.get_param_value(ParameterKeys.SSN))
-        print("Email address: ", self.personal_info.get_param_value(ParameterKeys.EMAIL))
+        for item in ParameterKeys:
+            print(f"{item.get_description()}: ",  self.personal_info.get_param_value(item.get_key()))
 

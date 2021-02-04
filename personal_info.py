@@ -25,12 +25,12 @@ class PersonalInfo:
         return self._param_value_dict[key]
 
     def contain_first_name(self):
-        if ParameterKeys.FIRST_NAME in self._param_value_dict:
+        if ParameterKeys.FIRST_NAME.get_key() in self._param_value_dict:
             return True
         return False
 
     def contains_last_name(self):
-        if ParameterKeys.LAST_NAME in self._param_value_dict:
+        if ParameterKeys.LAST_NAME.get_key() in self._param_value_dict:
             return True
 
         return False

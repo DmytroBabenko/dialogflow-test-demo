@@ -53,8 +53,8 @@ class NameCallingQAResponseGenerator(QAResponseGenerator):
         return random.choice(NameCallingQAResponseGenerator.NameCallingTemplateText.INTRO_LIST)
 
     def generate_response(self, personal_info: PersonalInfo) -> Tuple[bool, str]:
-        first_name: str = personal_info.get_param_value(ParameterKeys.FIRST_NAME)
-        last_name: str = personal_info.get_param_value(ParameterKeys.LAST_NAME)
+        first_name: str = personal_info.get_param_value(ParameterKeys.FIRST_NAME.get_key())
+        last_name: str = personal_info.get_param_value(ParameterKeys.LAST_NAME.get_key())
 
         if not first_name and not last_name:
             return False, random.choice(
@@ -95,7 +95,7 @@ class DOBQAResponseGenerator(QAResponseGenerator):
         return random.choice(self._INTRO_LIST)
 
     def generate_response(self, personal_info: PersonalInfo) -> Tuple[bool, str]:
-        dob: str = personal_info.get_param_value(ParameterKeys.DOB)
+        dob: str = personal_info.get_param_value(ParameterKeys.DOB.get_key())
 
         if not dob:
             return False, random.choice(self._NOT_DOB)
@@ -134,7 +134,7 @@ class SSNQAResponseGenerator(QAResponseGenerator):
         return response
 
     def generate_response(self, personal_info: PersonalInfo) -> Tuple[bool, str]:
-        ssn = personal_info.get_param_value(ParameterKeys.SSN)
+        ssn = personal_info.get_param_value(ParameterKeys.SSN.get_key())
         if not ssn:
             return False, random.choice(self._NOT_SSN)
 
@@ -168,8 +168,8 @@ class EmailQAResponseGenerator(QAResponseGenerator):
         return response
 
     def generate_response(self, personal_info: PersonalInfo) -> Tuple[bool, str]:
-        email: str = personal_info.get_param_value(ParameterKeys.EMAIL)
-        first_name: str = personal_info.get_param_value(ParameterKeys.FIRST_NAME)
+        email: str = personal_info.get_param_value(ParameterKeys.EMAIL.get_key())
+        first_name: str = personal_info.get_param_value(ParameterKeys.FIRST_NAME.get_key())
         if not email:
             return False, random.choice(self._NOT_EMAIL).format(name=first_name)
 

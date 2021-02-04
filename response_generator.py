@@ -34,7 +34,7 @@ class EndQASessionResponseGenerator(ResponseGenerator):
     ]
 
     def generate_response(self, personal_info: PersonalInfo) -> Tuple[bool, str]:
-        first_name = personal_info.get_param_value(key=ParameterKeys.FIRST_NAME)
+        first_name = personal_info.get_param_value(key=ParameterKeys.FIRST_NAME.get_key())
         intent_description = str(personal_info.main_user_intent)
         response = random.choice(self._RESPONSE_TEXT_LIST).format(name=first_name, intent=intent_description)
 
@@ -73,7 +73,7 @@ class FinishResponseGenerator(ResponseGenerator):
     ]
 
     def generate_response(self, personal_info: PersonalInfo) -> Tuple[bool, str]:
-        first_name = personal_info.get_param_value(key=ParameterKeys.FIRST_NAME)
+        first_name = personal_info.get_param_value(key=ParameterKeys.FIRST_NAME.get_key())
         response = random.choice(self._FINISH_TEXT_LIST) % first_name
 
         return True, response
