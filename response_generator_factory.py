@@ -33,6 +33,9 @@ class ResponseGeneratorFactory:
         if input_action == InputActionType.OPEN_LOAN:
             return qa_session
 
+        if input_action == InputActionType.INSURANCE:
+            return qa_session
+
         if input_action.is_question_answering():
             return qa_session
 
