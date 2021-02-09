@@ -39,7 +39,7 @@ class QuestionAnswerSession(ResponseGenerator):
         self._curr_qa_chain_pos = 0
         self._session_started: bool = False
 
-    def generate_response_and_parse_info(self, query_result: dict, personal_info: PersonalInfo) -> str:
+    def generate_response_and_parse_info(self, query_parameters: dict, personal_info: PersonalInfo) -> str:
         self._session_started = True
         cur_qa_type = self._get_current_qa_type()
         cur_qa_status = self._qa_type_chain[self._curr_qa_chain_pos].status
@@ -50,7 +50,7 @@ class QuestionAnswerSession(ResponseGenerator):
             self._qa_type_chain[self._curr_qa_chain_pos].status = QuestionAnswerSession.QAStatus.RECTIFICATION
             return response
         elif cur_qa_status == QuestionAnswerSession.QAStatus.RECTIFICATION:
-            if not qa_retrieval.parse_answer(query_result=query_result, personal_info=personal_info):
+            if not qa_retrieval.parse_answer(query_parameters=query_parameters, personal_info=personal_info):
                 return qa_retrieval.clarify_question(personal_info)
 
             self._qa_type_chain[self._curr_qa_chain_pos].status = QuestionAnswerSession.QAStatus.FINISHED

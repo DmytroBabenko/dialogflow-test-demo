@@ -12,7 +12,7 @@ class QARetrieval:
         ...
 
     @abstractmethod
-    def parse_answer(self, query_result: dict, personal_info: PersonalInfo) -> bool:
+    def parse_answer(self, query_parameters: dict, personal_info: PersonalInfo) -> bool:
         ...
 
     @abstractmethod
@@ -60,14 +60,14 @@ class NameQARetrieval(QARetrieval):
     def generate_intro_question(self) -> str:
         return random.choice(NameQARetrieval.NameCallingTemplateText.INTRO_LIST)
 
-    def parse_answer(self, query_result: dict, personal_info: PersonalInfo) -> bool:
-        if ParameterKeys.FIRST_NAME.get_key() in query_result:
+    def parse_answer(self, query_parameters: dict, personal_info: PersonalInfo) -> bool:
+        if ParameterKeys.FIRST_NAME.get_key() in query_parameters:
             personal_info.set_param_value(key=ParameterKeys.FIRST_NAME.get_key(),
-                                          value=query_result[ParameterKeys.FIRST_NAME.get_key()])
+                                          value=query_parameters[ParameterKeys.FIRST_NAME.get_key()])
 
-        if ParameterKeys.LAST_NAME in query_result:
+        if ParameterKeys.LAST_NAME in query_parameters:
             personal_info.set_param_value(key=ParameterKeys.FIRST_NAME.get_key(),
-                                          value=query_result[ParameterKeys.FIRST_NAME.get_key()])
+                                          value=query_parameters[ParameterKeys.FIRST_NAME.get_key()])
 
         if personal_info.contain_first_name() and personal_info.contains_last_name():
             return True
@@ -91,10 +91,10 @@ class DOBQARetrieval(QARetrieval):
     def generate_intro_question(self):
         return random.choice(self._INTRO_LIST)
 
-    def parse_answer(self, query_result: dict, personal_info: PersonalInfo) -> bool:
-        if ParameterKeys.DOB.get_key() in query_result:
+    def parse_answer(self, query_parameters: dict, personal_info: PersonalInfo) -> bool:
+        if ParameterKeys.DOB.get_key() in query_parameters:
             personal_info.set_param_value(key=ParameterKeys.DOB.get_key(),
-                                          value=query_result[ParameterKeys.DOB.get_key()])
+                                          value=query_parameters[ParameterKeys.DOB.get_key()])
 
         if personal_info.contains_info(key=ParameterKeys.DOB.get_key()):
             return True
@@ -121,10 +121,10 @@ class SSNQARetrieval(QARetrieval):
     def generate_intro_question(self):
         return random.choice(self._INTRO)
 
-    def parse_answer(self, query_result: dict, personal_info: PersonalInfo) -> bool:
-        if ParameterKeys.SSN.get_key() in query_result:
+    def parse_answer(self, query_parameters: dict, personal_info: PersonalInfo) -> bool:
+        if ParameterKeys.SSN.get_key() in query_parameters:
             personal_info.set_param_value(key=ParameterKeys.SSN.get_key(),
-                                          value=query_result[ParameterKeys.SSN.get_key()])
+                                          value=query_parameters[ParameterKeys.SSN.get_key()])
 
         if personal_info.contains_info(key=ParameterKeys.SSN.get_key()):
             return True
@@ -154,10 +154,10 @@ class EmailQARetrieval(QARetrieval):
     def generate_intro_question(self):
         return random.choice(self._INTRO)
 
-    def parse_answer(self, query_result: dict, personal_info: PersonalInfo) -> bool:
-        if ParameterKeys.EMAIL.get_key() in query_result:
+    def parse_answer(self, query_parameters: dict, personal_info: PersonalInfo) -> bool:
+        if ParameterKeys.EMAIL.get_key() in query_parameters:
             personal_info.set_param_value(key=ParameterKeys.EMAIL.get_key(),
-                                          value=query_result[ParameterKeys.EMAIL.get_key()])
+                                          value=query_parameters[ParameterKeys.EMAIL.get_key()])
 
         if personal_info.contains_info(key=ParameterKeys.EMAIL.get_key()):
             return True
