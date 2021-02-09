@@ -136,7 +136,7 @@ class DOBQARetrieval(QARetrieval):
             personal_info.dob_info = DOBInfo()
 
         if ParameterKeys.DOB.get_key() in query_parameters:
-            date_time_str = query_parameters[ParameterKeys.DOB.get_key()]
+            date_time_str = self._acquire_dob_param_value(query_parameters)
             date_obj = datetime.datetime.strptime(date_time_str, self._TIMESTAMP_FORMAT)
 
             now_date = datetime.datetime.now()
@@ -156,6 +156,13 @@ class DOBQARetrieval(QARetrieval):
             return True
 
         return False
+
+    @staticmethod
+    def _acquire_dob_param_value(query_parameters):
+        date_time_str = query_parameters[ParameterKeys.DOB.get_key()]
+        if type(date_time_str) is dict:
+            date_time_str = date_time_str['startDate']
+        return date_time_str
 
     def clarify_question(self, personal_info: PersonalInfo) -> str:
         if not personal_info.dob_info:
