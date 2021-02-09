@@ -42,7 +42,7 @@ class FinishResponseGenerator(ResponseGenerator):
     ]
 
     def generate_response_and_parse_info(self, query_result: dict, personal_info: PersonalInfo) -> str:
-        first_name = personal_info.get_param_value(key=ParameterKeys.FIRST_NAME.get_key())
+        first_name = personal_info.name_info.first_name
         response = random.choice(self._FINISH_TEXT_LIST) % first_name
 
         return response

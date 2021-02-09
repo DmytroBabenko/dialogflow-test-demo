@@ -1,8 +1,9 @@
 import random
+import datetime
 
 from abc import abstractmethod
 from parameter_keys import ParameterKeys
-from personal_info import PersonalInfo
+from personal_info import PersonalInfo, NameInfo, DOBInfo
 
 
 class QARetrieval:
@@ -45,15 +46,17 @@ class NameQARetrieval(QARetrieval):
         ]
 
     def clarify_question(self, personal_info: PersonalInfo) -> str:
-        first_name: str = personal_info.get_param_value(ParameterKeys.FIRST_NAME.get_key())
-        last_name: str = personal_info.get_param_value(ParameterKeys.LAST_NAME.get_key())
+        name_info = personal_info.name_info
 
-        if not first_name and not last_name:
+        if not name_info:
             return random.choice(NameQARetrieval.NameCallingTemplateText.NO_FIRST_AND_LAST_NAME_LIST)
-        elif not first_name:
-            return random.choice(NameQARetrieval.NameCallingTemplateText.NO_FIRST_NAME_LIST) % last_name
-        elif not last_name:
-            return random.choice(NameQARetrieval.NameCallingTemplateText.NO_LAST_NAME_LIST) % first_name
+
+        if not name_info.first_name and not name_info.last_name:
+            return random.choice(NameQARetrieval.NameCallingTemplateText.NO_FIRST_AND_LAST_NAME_LIST)
+        elif not name_info.first_name:
+            return random.choice(NameQARetrieval.NameCallingTemplateText.NO_FIRST_NAME_LIST) % name_info.last_name
+        elif not name_info.last_name:
+            return random.choice(NameQARetrieval.NameCallingTemplateText.NO_LAST_NAME_LIST) % name_info.first_name
 
         return ""
 
@@ -61,48 +64,125 @@ class NameQARetrieval(QARetrieval):
         return random.choice(NameQARetrieval.NameCallingTemplateText.INTRO_LIST)
 
     def parse_answer(self, query_parameters: dict, personal_info: PersonalInfo) -> bool:
+        if not personal_info.name_info:
+            personal_info.name_info = NameInfo()
+
         if ParameterKeys.FIRST_NAME.get_key() in query_parameters:
-            personal_info.set_param_value(key=ParameterKeys.FIRST_NAME.get_key(),
-                                          value=query_parameters[ParameterKeys.FIRST_NAME.get_key()])
+            personal_info.name_info.first_name = query_parameters[ParameterKeys.FIRST_NAME.get_key()]
 
-        if ParameterKeys.LAST_NAME in query_parameters:
-            personal_info.set_param_value(key=ParameterKeys.FIRST_NAME.get_key(),
-                                          value=query_parameters[ParameterKeys.FIRST_NAME.get_key()])
+        if ParameterKeys.LAST_NAME.get_key() in query_parameters:
+            personal_info.name_info.last_name = query_parameters[ParameterKeys.LAST_NAME.get_key()]
 
-        if personal_info.contain_first_name() and personal_info.contains_last_name():
+        if personal_info.name_info.first_name and personal_info.name_info.last_name:
             return True
 
         return False
 
 
 class DOBQARetrieval(QARetrieval):
+    _TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
+
     _INTRO_LIST = [
         "And provide me your date of birthday",
     ]
 
     _NOT_DOB = [
-        "Sorry, I did not get your date of birthday. Could you please provide "
+        "Sorry, I did not get your date of birthday. Could you please provide ",
+        "Sorry, I did not get it. Please provide your day month and year of your birthday"
+    ]
+
+    _NOT_YEAR = [
+        "Could you repeat please your year of birthday",
+        "And in which year of your birthday"
+    ]
+
+    _NOT_MONTH = [
+        "Could you repeat please your month of birthday",
+        "And in which month of your birthday"
+    ]
+
+    _NOT_DAY = [
+        "Could you repeat please your day of birthday",
+        "And in which day of your birthday"
+    ]
+
+    _NOT_MONTH_AND_DAY = [
+        "And what is your day and month of birthday",
+        "And provide please your day and month of birthday"
+    ]
+
+    _NOT_MONTH_AND_YEAR = [
+        "And what is your year and month of birthday",
+        "And provide please your year and month of birthday"
+    ]
+
+    _NOT_YEAR_AND_DAY = [
+        "And what is your year and day of birthday",
+        "And provide please your year and day of birthday"
     ]
 
     _UNSUITABLE_INTENT_ANSWER_START_LIST = [
         "Let's finish with providing date of birthday  and later move on to the {intent_desc} part. "
     ]
 
+    def __init__(self):
+        self._first_retrieval: bool = True
+
     def generate_intro_question(self):
         return random.choice(self._INTRO_LIST)
 
     def parse_answer(self, query_parameters: dict, personal_info: PersonalInfo) -> bool:
-        if ParameterKeys.DOB.get_key() in query_parameters:
-            personal_info.set_param_value(key=ParameterKeys.DOB.get_key(),
-                                          value=query_parameters[ParameterKeys.DOB.get_key()])
+        if not personal_info.dob_info:
+            personal_info.dob_info = DOBInfo()
 
-        if personal_info.contains_info(key=ParameterKeys.DOB.get_key()):
+        if ParameterKeys.DOB.get_key() in query_parameters:
+            date_time_str = query_parameters[ParameterKeys.DOB.get_key()]
+            date_obj = datetime.datetime.strptime(date_time_str, self._TIMESTAMP_FORMAT)
+
+            now_date = datetime.datetime.now()
+
+            if not personal_info.dob_info.year and (date_obj.year != now_date.year or not self._first_retrieval):
+                personal_info.dob_info.year = date_obj.year
+
+            if not personal_info.dob_info.month and (date_obj.month != now_date.month or not self._first_retrieval):
+                personal_info.dob_info.month = date_obj.month
+
+            if not personal_info.dob_info.day and (date_obj.day != now_date.day or not self._first_retrieval):
+                personal_info.dob_info.day = date_obj.day
+
+            self._first_retrieval = False
+
+        if personal_info.dob_info.contains_all_info():
             return True
 
         return False
 
     def clarify_question(self, personal_info: PersonalInfo) -> str:
-        return random.choice(self._NOT_DOB)
+        if not personal_info.dob_info:
+            return random.choice(self._NOT_DOB)
+
+        if not personal_info.dob_info.year and not personal_info.dob_info.month and not personal_info.dob_info.day:
+            return random.choice(self._NOT_DOB)
+
+        if not personal_info.dob_info.year and not personal_info.dob_info.month:
+            return random.choice(self._NOT_MONTH_AND_YEAR)
+
+        if not personal_info.dob_info.month and not personal_info.dob_info.day:
+            return random.choice(self._NOT_MONTH_AND_DAY)
+
+        if not personal_info.dob_info.day and not personal_info.dob_info.year:
+            return random.choice(self._NOT_YEAR_AND_DAY)
+
+        if not personal_info.dob_info.year:
+            return random.choice(self._NOT_YEAR)
+
+        if not personal_info.dob_info.month:
+            return random.choice(self._NOT_MONTH)
+
+        if not personal_info.dob_info.day:
+            return random.choice(self._NOT_DAY)
+
+        return ""
 
 
 class SSNQARetrieval(QARetrieval):
@@ -123,10 +203,9 @@ class SSNQARetrieval(QARetrieval):
 
     def parse_answer(self, query_parameters: dict, personal_info: PersonalInfo) -> bool:
         if ParameterKeys.SSN.get_key() in query_parameters:
-            personal_info.set_param_value(key=ParameterKeys.SSN.get_key(),
-                                          value=query_parameters[ParameterKeys.SSN.get_key()])
+            personal_info.ssn = query_parameters[ParameterKeys.SSN.get_key()]
 
-        if personal_info.contains_info(key=ParameterKeys.SSN.get_key()):
+        if personal_info.ssn:
             return True
 
         return False
@@ -156,14 +235,13 @@ class EmailQARetrieval(QARetrieval):
 
     def parse_answer(self, query_parameters: dict, personal_info: PersonalInfo) -> bool:
         if ParameterKeys.EMAIL.get_key() in query_parameters:
-            personal_info.set_param_value(key=ParameterKeys.EMAIL.get_key(),
-                                          value=query_parameters[ParameterKeys.EMAIL.get_key()])
+            personal_info.email = query_parameters[ParameterKeys.EMAIL.get_key()]
 
-        if personal_info.contains_info(key=ParameterKeys.EMAIL.get_key()):
+        if personal_info.email:
             return True
 
         return False
 
     def clarify_question(self, personal_info: PersonalInfo) -> str:
-        first_name: str = personal_info.get_param_value(ParameterKeys.FIRST_NAME.get_key())
+        first_name: str = personal_info.name_info.first_name
         return random.choice(self._NOT_EMAIL).format(name=first_name)

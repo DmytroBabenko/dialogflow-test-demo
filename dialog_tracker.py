@@ -1,5 +1,4 @@
 from input_action_type import InputActionType
-from parameter_keys import ParameterKeys
 from personal_info import PersonalInfo
 from question_answer_session.question_answer_session import QuestionAnswerSession
 from response_generator_factory import ResponseGeneratorFactory
@@ -20,7 +19,9 @@ class DialogTracker:
         self._expected_input_action = response_generator.get_expected_next_action_type()
         return response
 
-    def save_personal_information(self):
-        print("#########-Personal information#########################")
-        for item in ParameterKeys:
-            print(f"{item.get_description()}: ", self._personal_info.get_param_value(item.get_key()))
+    def show_personal_information(self):
+        """
+
+        :rtype: object
+        """
+        print(str(self._personal_info))

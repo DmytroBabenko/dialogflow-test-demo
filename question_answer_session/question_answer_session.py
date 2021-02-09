@@ -1,7 +1,7 @@
 import random
 
 from enum import Enum
-from typing import List
+from typing import List, Dict
 
 from input_action_type import InputActionType
 from parameter_keys import ParameterKeys
@@ -38,32 +38,41 @@ class QuestionAnswerSession(ResponseGenerator):
 
         self._curr_qa_chain_pos = 0
         self._session_started: bool = False
+        self._qa_retrieval_dict: Dict[QAType, QARetrieval] = dict()
 
     def generate_response_and_parse_info(self, query_parameters: dict, personal_info: PersonalInfo) -> str:
         self._session_started = True
         cur_qa_type = self._get_current_qa_type()
         cur_qa_status = self._qa_type_chain[self._curr_qa_chain_pos].status
-        qa_retrieval: QARetrieval = QuestionAnswerRetrievalCreator.create(cur_qa_type)
+        if cur_qa_type not in self._qa_retrieval_dict:
+            self._qa_retrieval_dict[cur_qa_type] = QuestionAnswerRetrievalCreator.create(cur_qa_type)
 
         if cur_qa_status == QuestionAnswerSession.QAStatus.INTRO:
-            response = qa_retrieval.generate_intro_question()
+            response = self._qa_retrieval_dict[cur_qa_type].generate_intro_question()
             self._qa_type_chain[self._curr_qa_chain_pos].status = QuestionAnswerSession.QAStatus.RECTIFICATION
             return response
         elif cur_qa_status == QuestionAnswerSession.QAStatus.RECTIFICATION:
-            if not qa_retrieval.parse_answer(query_parameters=query_parameters, personal_info=personal_info):
-                return qa_retrieval.clarify_question(personal_info)
+            if not self._qa_retrieval_dict[cur_qa_type].parse_answer(query_parameters=query_parameters, personal_info=personal_info):
+                return self._qa_retrieval_dict[cur_qa_type].clarify_question(personal_info)
 
             self._qa_type_chain[self._curr_qa_chain_pos].status = QuestionAnswerSession.QAStatus.FINISHED
 
-            if self._curr_qa_chain_pos < len(self._qa_type_chain) - 1:
-                self._curr_qa_chain_pos += 1
-                qa_retrieval: QARetrieval = QuestionAnswerRetrievalCreator.create(
+            self._curr_qa_chain_pos += 1
+            if self._curr_qa_chain_pos < len(self._qa_type_chain):
+                self._qa_retrieval_dict[cur_qa_type]: QARetrieval = QuestionAnswerRetrievalCreator.create(
                     self._qa_type_chain[self._curr_qa_chain_pos].qa_type)
-                response = qa_retrieval.generate_intro_question()
+                response = self._qa_retrieval_dict[cur_qa_type].generate_intro_question()
                 self._qa_type_chain[self._curr_qa_chain_pos].status = QuestionAnswerSession.QAStatus.RECTIFICATION
                 return response
 
         return self._generate_end_of_qa_session_response(personal_info)
+
+    @staticmethod
+    def _parse_answer(qa_retrieval: QARetrieval, query_parameters: dict, personal_info: PersonalInfo):
+        try:
+            return qa_retrieval.parse_answer(query_parameters=query_parameters, personal_info=personal_info)
+        except:
+            return False
 
     def get_expected_next_action_type(self) -> InputActionType:
         if self._curr_qa_chain_pos >= len(self._qa_type_chain):
@@ -80,7 +89,7 @@ class QuestionAnswerSession(ResponseGenerator):
         return cur_qa_type
 
     def _generate_end_of_qa_session_response(self, personal_info: PersonalInfo) -> str:
-        first_name = personal_info.get_param_value(key=ParameterKeys.FIRST_NAME.get_key())
+        first_name = personal_info.name_info.first_name
         intent_description = str(personal_info.main_user_intent)
         response = random.choice(self._END_RESPONSE_TEXT_LIST).format(name=first_name, intent=intent_description)
 

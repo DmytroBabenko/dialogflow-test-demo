@@ -9,13 +9,13 @@ class DialogProcessor:
     def process(self, input_action_type: InputActionType, query_result):
         if self._is_start_dialog(input_action_type, query_result):
             if self._cur_dialog_tracker:
-                self._cur_dialog_tracker.save_personal_information()
+                self._cur_dialog_tracker.show_personal_information()
             self._cur_dialog_tracker = DialogTracker()
 
         response = self._cur_dialog_tracker.track(user_input_action=input_action_type, query_result=query_result)
 
         if self._is_end_dialog(input_action_type, query_result):
-            self._cur_dialog_tracker.save_personal_information()
+            self._cur_dialog_tracker.show_personal_information()
             self._cur_dialog_tracker = None
 
         return response
