@@ -13,15 +13,15 @@ class IntentType(aenum.Enum):
 
 
 class InputActionType(Enum):
-    WELCOME = 0,
-    OPEN_LOAN = 1,
-    NAME_CALLING = 2,
-    DOB_CALLING = 3,
-    SSN_CALLING = 4,
-    EMAIL_CALLING = 5,
-    END = 6,
-    ANY = 7,
-    UNKNOWN = -1
+    WELCOME = 0, "welcome"
+    OPEN_LOAN = 1, "open loan"
+    NAME_CALLING = 2, "your name"
+    DOB_CALLING = 3, "date of birthday"
+    SSN_CALLING = 4, "social security number"
+    EMAIL_CALLING = 5, "email calling"
+    END = 6, "finish"
+    ANY = 7, "this"
+    UNKNOWN = -1, "that"
 
     def is_intent(self):
         if self is InputActionType.OPEN_LOAN:
@@ -49,9 +49,8 @@ class InputActionType(Enum):
 
         return False
 
-    # def __str__(self):
-    #     #TODO: add description
-    #     return str(self)
+    def __str__(self):
+        return self.value[1]
 
 QA_SESSION_TYPES = [InputActionType.NAME_CALLING, InputActionType.DOB_CALLING]
 
